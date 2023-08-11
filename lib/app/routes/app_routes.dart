@@ -8,6 +8,8 @@ abstract class Routes {
   static const NAV = _Paths.NAV;
   static const HOME = _Paths.HOME;
   static const GRAPHQL = _Paths.GRAPHQL;
+  static const TASK = _Paths.TASK;
+  static const CUSTOMER = _Paths.CUSTOMER;
 }
 
 abstract class _Paths {
@@ -15,4 +17,6 @@ abstract class _Paths {
   static const NAV = '/nav';
   static const HOME = '/home';
   static const GRAPHQL = '/graphql';
+  static const TASK = '/task';
+  static const CUSTOMER = '/customer';
 }

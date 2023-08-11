@@ -1,4 +1,4 @@
-class Task {
+class MyTask {
   static final tblTask = "Tasks";
   static final dbId = "id";
   static final dbTitle = "title";
@@ -17,7 +17,7 @@ class Task {
   TaskPriority taskPriority;
   TaskStatus? taskStatus;
 
-  Task.create({
+  MyTask.create({
     required this.title,
     required this.itemType,
     required this.customerId,
@@ -32,9 +32,9 @@ class Task {
     }
   }
 
-  bool operator ==(o) => o is Task && o.id == id;
+  bool operator ==(o) => o is MyTask && o.id == id;
 
-  Task.update({
+  MyTask.update({
     required this.id,
     required this.title,
     required this.customerId,
@@ -51,7 +51,7 @@ class Task {
     this.taskStatus = TaskStatus.PENDING;
   }
 
-  Task.fromMap(Map<String, dynamic> map)
+  MyTask.fromMap(Map<String, dynamic> map)
       : this.update(
           id: map[dbId],
           title: map[dbTitle],

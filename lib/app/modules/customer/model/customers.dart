@@ -1,3 +1,5 @@
+final customer2 = Customer.create(name: 'Jane Smith', address: '456 Elm St', phone: '987-654-3210');
+
 class Customer {
   static const tblCustomer = "Customers";
   static const dbId = "id";
@@ -7,14 +9,26 @@ class Customer {
   static const dbCreatedDate = "created_date";
 
   String name;
-  String? phone, address, id;
-  int? createdDate;
+  String? phone, address;
+  int? createdDate, id;
+
+
+  Map<String, dynamic> toMap() {
+    return {
+      dbId: id ?? 0,
+      dbName: name ?? '',
+      dbPhone: phone ?? '',
+      dbAddress: address ?? '',
+      dbCreatedDate: createdDate ?? -1,
+    };
+  }
 
   Customer.create({
     required this.name,
     this.address = '',
     this.phone = '',
     this.createdDate = -1,
+    this.id = 0,
   }) {
     if (this.createdDate == -1) {
       this.createdDate = DateTime.now().millisecondsSinceEpoch;

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -10,6 +12,14 @@ import 'config/translations/localization_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // // if (Platform.isWindows || Platform.isLinux) {
+  // //   // Initialize FFI
+  // //   sqfliteFfiInit();
+  // // }
+  // // Change the default factory. On iOS/Android, if not using `sqlite_flutter_lib` you can forget
+  // // this step, it will use the sqlite version available on the system.
+
   // Device orientation
   SystemChrome.setPreferredOrientations(
     [DeviceOrientation.portraitUp],

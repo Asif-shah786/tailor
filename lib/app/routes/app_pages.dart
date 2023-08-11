@@ -2,10 +2,10 @@ import 'package:get/get.dart';
 
 import '../components/navbar/bottom_navbar.dart';
 import '../components/navbar/navbar_binding.dart';
-import '../modules/home-with-graphql/bindings/graphql_binding.dart';
-import '../modules/home-with-graphql/views/graphql_view.dart';
-import '../modules/home-with-restAPI/bindings/home_binding.dart';
-import '../modules/home-with-restAPI/views/home_view.dart';
+import '../modules/customer/bindings/customer_binding.dart';
+import '../modules/customer/views/customer_view.dart';
+import '../modules/task/bindings/task_binding.dart';
+import '../modules/task/views/task_view.dart';
 
 // ignore_for_file: constant_identifier_names
 
@@ -16,6 +16,7 @@ class AppPages {
 
   static const NAV = Routes.NAV;
   static const HOME = Routes.HOME;
+  static const Customer = Routes.CUSTOMER;
 
   static final routes = [
     /// NAV BAR
@@ -27,14 +28,14 @@ class AppPages {
 
     ///
     GetPage(
-      name: _Paths.HOME,
-      page: () => HomeView(),
-      binding: HomeBinding(),
+      name: _Paths.TASK,
+      page: () => TaskView(),
+      binding: TaskBinding(),
     ),
     GetPage(
-      name: _Paths.GRAPHQL,
-      page: () => const GraphQLView(),
-      binding: GraphQLBinding(),
+      name: _Paths.CUSTOMER,
+      page: () =>  CustomerView(),
+      binding: CustomerBinding(),
     ),
   ];
 }

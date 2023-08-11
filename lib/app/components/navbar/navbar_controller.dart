@@ -1,12 +1,13 @@
 import 'package:get/get.dart';
-
-import '../../modules/home-with-graphql/views/graphql_view.dart';
-import '../../modules/home-with-restAPI/views/home_view.dart';
+import 'package:tailor/app/components/global-widgets/custom_drawer.dart';
+import 'package:tailor/app/modules/task/views/task_view.dart';
 
 class NavbarController extends GetxController {
+
+  final controller = Get.find<CustomDrawerController>();
+
   List navigation = [
-    const HomeView(),
-    const GraphQLView(),
+    TaskView(),
   ];
   RxInt selectedIndex = 0.obs;
 
