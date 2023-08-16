@@ -1,4 +1,5 @@
 import 'package:sqflite/sqflite.dart';
+import 'package:tailor/app/modules/task/model/tasks.dart';
 
 import '../../modules/Customer/model/Customers.dart';
 import 'app_db.dart';
@@ -18,7 +19,8 @@ class CustomerDB {
 
   Future<List<Customer>> getCustomers() async {
     var db = await _appDatabase.getDb();
-    var result = await db.rawQuery('SELECT * FROM ${Customer.tblCustomer}');
+    var result = await db.rawQuery('SELECT * FROM ${Customer.tblCustomer}'
+        '  ORDER BY ${Customer.dbName} ASC');
     List<Customer> customers = [];
     for (Map<String, dynamic> item in result) {
       var myCustomer = Customer.fromMap(item);
@@ -31,7 +33,7 @@ class CustomerDB {
     var db = await _appDatabase.getDb();
     await db.transaction((Transaction txn) async {
       await txn.rawInsert(
-          'INSERT OR REPLACE INTO '
+          'INSERT INTO '
           '${Customer.tblCustomer}(${Customer.dbName},${Customer.dbPhone},${Customer.dbAddress},${Customer.dbCreatedDate})'
           ' VALUES(?,?,?,?)',
           [
@@ -41,16 +43,22 @@ class CustomerDB {
             "${customer.createdDate}"
           ]);
     });
-
-    List<Customer> list2 = await getCustomers();
-    print('Customers List : ${list2.length}');
   }
 
-  Future deleteCustomer(int CustomerID) async {
+  Future delete (Customer customer) async {
     var db = await _appDatabase.getDb();
-    await db.transaction((Transaction txn) async {
+    await db.transaction((txn) async {
       await txn.rawDelete(
-          'DELETE FROM ${Customer.tblCustomer} WHERE ${Customer.dbId}==$CustomerID;');
+        'DELETE FROM ${Customer.tblCustomer} WHERE  id = ?',[
+          customer.id
+      ]
+      );
+      await txn.rawDelete(
+          'DELETE FROM ${MyTask.tblTask} WHERE  customer_id = ?',[
+        customer.id
+      ]
+      );
     });
   }
+
 }

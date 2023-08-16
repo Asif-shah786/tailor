@@ -5,18 +5,22 @@ part of 'app_pages.dart';
 
 abstract class Routes {
   Routes._();
+  static const SPLASH = _Paths.SPLASH;
   static const NAV = _Paths.NAV;
   static const HOME = _Paths.HOME;
-  static const GRAPHQL = _Paths.GRAPHQL;
   static const TASK = _Paths.TASK;
   static const CUSTOMER = _Paths.CUSTOMER;
+  static const EXPLORE = _Paths.EXPLORE;
+  static const PRINTER = _Paths.PRINTER;
 }
 
 abstract class _Paths {
   _Paths._();
+  static const SPLASH = '/';
   static const NAV = '/nav';
   static const HOME = '/home';
-  static const GRAPHQL = '/graphql';
   static const TASK = '/task';
   static const CUSTOMER = '/customer';
+  static const EXPLORE = '/explore';
+  static const PRINTER = '/printer';
 }

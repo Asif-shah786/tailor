@@ -6,7 +6,7 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
-import '../../modules/task/model/Tasks.dart';
+import '../../modules/task/model/tasks.dart';
 import '../../modules/customer/model/customers.dart';
 
 /// This is the singleton database class which handlers all database transactions
@@ -72,16 +72,16 @@ class AppDatabase {
           "${Customer.dbPhone} TEXT,"
           "${Customer.dbAddress} TEXT,"
           "${Customer.dbCreatedDate} INT)");
-      await txn.rawInsert(
-          'INSERT INTO ${Customer.tblCustomer}(${Customer.dbId},${Customer.dbName},${Customer.dbPhone},${Customer.dbAddress},${Customer.dbCreatedDate})'
-          ' VALUES(? ,?,  ? , ?, ?) ',
-          [0, "Asif", "+923015544682", "Ghazi, Kpk, Pakistan", "-1"]);
+      // await txn.rawInsert(
+      //     'INSERT INTO ${Customer.tblCustomer}(${Customer.dbId},${Customer.dbName},${Customer.dbPhone},${Customer.dbAddress},${Customer.dbCreatedDate})'
+      //     ' VALUES(? ,?,  ? , ?, ?) ',
+      //     [0, "Asif", "+923015544682", "Ghazi, Kpk, Pakistan", "-1"]);
     });
   }
 
   Future _createTaskTable(Database db) {
     return db.transaction((Transaction txn) async {
-      txn.execute("CREATE TABLE ${MyTask.tblTask} ("
+      await txn.execute("CREATE TABLE ${MyTask.tblTask} ("
           "${MyTask.dbId} INTEGER PRIMARY KEY AUTOINCREMENT,"
           "${MyTask.dbTitle} TEXT,"
           "${MyTask.dbDetail} TEXT,"
@@ -91,7 +91,16 @@ class AppDatabase {
           "${MyTask.dbCreatedDate} LONG,"
           "${MyTask.dbDueDate} LONG,"
           "${MyTask.dbCustomerId} INTEGER,"
-          "FOREIGN KEY(${MyTask.dbCustomerId}) REFERENCES ${Customer.tblCustomer}(${Customer.dbId}) ON DELETE CASCADE);");
+          "${MyTask.dbCustomerName} TEXT,"
+          "${MyTask.dbShelfBefore} INTEGER,"
+          "${MyTask.dbShelfAfter} INTEGER,"
+          "${MyTask.dbPrice} REAL,"
+          "FOREIGN KEY(${MyTask.dbCustomerId}) REFERENCES ${Customer.tblCustomer} (${Customer.dbId}) ON DELETE CASCADE);");
+
+      // await txn.rawInsert(
+      //     'INSERT INTO ${MyTask.tblTask}(${MyTask.dbId}, ${MyTask.dbTitle},${MyTask.dbDetail},${MyTask.dbItemType},${MyTask.dbPriority},${MyTask.dbStatus},${MyTask.dbCreatedDate},${MyTask.dbDueDate},${MyTask.dbCustomerId},${MyTask.dbCustomerName},  ${MyTask.dbShelfBefore}, ${MyTask.dbShelfAfter})'
+      //         ' VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      //     [0, "Sample Title", "Sample Detail", "Sample ItemType", "Sample Priority", "Sample Status", DateTime.now().millisecondsSinceEpoch, DateTime.now().millisecondsSinceEpoch, 1, "Sample Customer Name", 0, 0]);
     });
   }
 }

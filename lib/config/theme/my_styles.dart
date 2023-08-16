@@ -118,7 +118,7 @@ class MyStyles {
   // elevated button text style
   static MaterialStateProperty<TextStyle?>? getElevatedButtonTextStyle(
       bool isLightTheme,
-      {bool isBold = true,
+      {bool isBold = false,
       double? fontSize}) {
     return MaterialStateProperty.resolveWith<TextStyle>(
       (Set<MaterialState> states) {
@@ -161,7 +161,7 @@ class MyStyles {
           ),
           elevation: MaterialStateProperty.all(0),
           padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-              EdgeInsets.symmetric(vertical: 8.h)),
+              EdgeInsets.symmetric(vertical: 6.h, horizontal: 4.w)),
           textStyle: getElevatedButtonTextStyle(isLightTheme),
           backgroundColor: MaterialStateProperty.resolveWith<Color>(
             (Set<MaterialState> states) {

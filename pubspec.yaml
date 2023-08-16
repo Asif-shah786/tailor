@@ -38,14 +38,15 @@ dependencies:
   firebase_messaging: ^14.6.4
   awesome_notifications: ^0.7.4+1
   carousel_slider: ^4.2.1
-  cached_network_image: ^3.2.3
-  graphql_flutter: ^5.1.0
   intl: ^0.18.1
   animated_text_kit: ^4.2.2
-  device_info_plus: ^9.0.2
   sqflite: ^2.3.0
   path: ^1.8.3
   sqflite_common_ffi_web: ^0.4.0
+  timeago: ^3.5.0
+  path_provider: ^2.1.0
+  device_info_plus: ^9.0.3
+  animate_do: ^3.0.2
 
 dev_dependencies:
   flutter_test:
@@ -62,8 +63,8 @@ flutter_icons:
 
 flutter_native_splash:
   background_image: assets/images/icon-splash/splash.png
-  android: true
-  ios: true
+  android: false
+  ios: false
 
 
 

@@ -4,8 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:tailor/app/components/splash/splash_binding.dart';
 
 import 'app/data/local/my_shared_pref.dart';
+import 'app/data/local/tasks_db.dart';
 import 'app/routes/app_pages.dart';
 import 'config/theme/my_theme.dart';
 import 'config/translations/localization_service.dart';
@@ -13,17 +16,15 @@ import 'config/translations/localization_service.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+
+
   // // if (Platform.isWindows || Platform.isLinux) {
   // //   // Initialize FFI
-  // //   sqfliteFfiInit();
-  // // }
+  //   sqfliteFfiInit();
+  // }
   // // Change the default factory. On iOS/Android, if not using `sqlite_flutter_lib` you can forget
   // // this step, it will use the sqlite version available on the system.
 
-  // Device orientation
-  SystemChrome.setPreferredOrientations(
-    [DeviceOrientation.portraitUp],
-  );
   // Device info
 //  DeviceInfoHelper.initializeDeviceInfo();
 
@@ -61,8 +62,7 @@ Future<void> main() async {
               ),
             );
           },
-
-          initialRoute: AppPages.NAV,
+          initialRoute: AppPages.SPLASH,
           // first screen to show when app is running
 
           defaultTransition: Transition.noTransition,

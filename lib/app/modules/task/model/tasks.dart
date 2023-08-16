@@ -8,24 +8,32 @@ class MyTask {
   static final dbCreatedDate = "created_date";
   static final dbPriority = "priority";
   static final dbStatus = "status";
+  static final dbShelfBefore = "shelf_before";
+  static final dbShelfAfter = "shelf_After";
+  static final dbCustomerName = "customer_name";
   static final dbCustomerId = "customer_id";
+  static final dbPrice = "price";
 
-  String title, itemType, customerId;
+  String title, itemType, customerName;
   String? detail;
-  int? id, createdDate;
-  int dueDate;
-  TaskPriority taskPriority;
-  TaskStatus? taskStatus;
+  int? id, createdDate, shelfAfter;
+  int dueDate, customerId, shelfBefore;
+  double price;
+  String? taskPriority, taskStatus;
 
   MyTask.create({
     required this.title,
     required this.itemType,
     required this.customerId,
-    this.taskStatus = TaskStatus.PENDING,
+    required this.customerName,
+    required this.shelfBefore,
+    required this.price,
+    this.taskStatus = 'PENDING',
+    this.shelfAfter = -1,
     this.detail = "",
     this.dueDate = -1,
     this.createdDate = -1,
-    this.taskPriority = TaskPriority.PRIORITY_3,
+    this.taskPriority = 'PRIORITY_3',
   }) {
     if (this.createdDate == -1) {
       this.createdDate = DateTime.now().millisecondsSinceEpoch;
@@ -38,36 +46,53 @@ class MyTask {
     required this.id,
     required this.title,
     required this.customerId,
+    required this.customerName,
+    required this.shelfBefore,
     required this.itemType,
-    this.taskStatus = TaskStatus.PENDING,
+    required this.price,
+    this.taskStatus = 'PENDING',
     this.detail = "",
+    this.shelfAfter = -1,
     this.dueDate = -1,
     this.createdDate = -1,
-    this.taskPriority = TaskPriority.PRIORITY_3,
+    this.taskPriority = 'PRIORITY_3',
   }) {
     if (this.createdDate == -1) {
       this.createdDate = DateTime.now().millisecondsSinceEpoch;
     }
-    this.taskStatus = TaskStatus.PENDING;
   }
 
   MyTask.fromMap(Map<String, dynamic> map)
       : this.update(
           id: map[dbId],
+          customerName: map[dbCustomerName],
           title: map[dbTitle],
+          shelfBefore: map[dbShelfBefore],
           customerId: map[dbCustomerId],
           itemType: map[dbItemType],
           detail: map[dbDetail],
+          shelfAfter: map[dbShelfAfter],
           dueDate: map[dbDueDate],
           createdDate: map[dbCreatedDate],
-          taskPriority: TaskPriority.values[map[dbPriority]],
-          taskStatus: TaskStatus.values[map[dbStatus]],
+          taskPriority: map[dbPriority],
+          taskStatus: map[dbStatus],
+          price: map[dbPrice],
         );
 }
+
+String strTaskStatusPending = 'PENDING';
+String strTaskStatusComplete = 'COMPLETED';
+String strTaskStatusOverDue = 'OVERDUE';
+
+String strTaskPriority1 = 'priority_1';
+String strTaskPriority2 = 'priority_2';
+String strTaskPriority3 = 'priority_3';
+
 
 enum TaskStatus {
   PENDING,
   COMPLETE,
+  OVERDUE,
 }
 enum TaskPriority{
   PRIORITY_1,

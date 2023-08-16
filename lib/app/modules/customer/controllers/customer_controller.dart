@@ -13,15 +13,14 @@ class CustomerController extends GetxController {
       StreamController<List<Customer>>.broadcast();
 
   Stream<List<Customer>> get customers => _customerController!.stream;
-
   late CustomerDB _customerDB;
-  late bool isInboxVisible;
+  RxBool showSearch = false.obs;
 
   @override
   void onInit() {
     // TODO: implement onInit
     _customerDB = CustomerDB.get();
-    isInboxVisible = true;
+    refresh();
     super.onInit();
   }
 
@@ -30,7 +29,7 @@ class CustomerController extends GetxController {
     _customerController.close();
   }
 
-  void _loadCustomers(bool isInboxVisible) {
+  void _loadCustomers() {
     _customerDB.getCustomers().then((projects) {
       print('Projects Length');
       print(projects.length);
@@ -40,19 +39,20 @@ class CustomerController extends GetxController {
     });
   }
 
-  void createCustomer(Customer customer) {
-    _customerDB.insertOrReplace(customer).then((value) {
-      if (value == null) {
-        Get.snackbar('Error', 'Failed to add customer',
-            backgroundColor: Colors.red, colorText: Colors.white);
-        return;
-      }
-      _loadCustomers(isInboxVisible);
+  Future<void> createCustomer(Customer customer) async {
+    await _customerDB.insertOrReplace(customer).then((value) {
+      _loadCustomers();
+    });
+  }
+
+  Future<void> delete(Customer customer) async {
+    await _customerDB.delete(customer).then((value) {
+      _loadCustomers();
     });
   }
 
 
   void refresh() {
-    _loadCustomers(isInboxVisible);
+    _loadCustomers();
   }
 }
