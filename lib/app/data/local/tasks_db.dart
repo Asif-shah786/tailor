@@ -95,13 +95,11 @@ class TaskDB {
       tomorrow.microsecondsSinceEpoch,
       strTaskStatusOverDue
     ]);
-
     List<MyTask> tasks = [];
     for (Map<String, dynamic> item in result) {
       var myTask = MyTask.fromMap(item);
       tasks.add(myTask);
     }
-
     print(tasks.length);
     return tasks;
   }
