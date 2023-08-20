@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
@@ -21,7 +20,6 @@ class AppDatabase {
 
   static AppDatabase get() {
     print('AppDatabase get Called');
-    print('get');
     return _appDatabase;
   }
 
@@ -30,13 +28,11 @@ class AppDatabase {
   /// Use this method to access the database which will provide you future of [Database],
   /// because initialization of the database (it has to go through the method channel)
   Future<Database> getDb() async {
-    print('getDb');
     await _init();
     return _database;
   }
 
   Future _init() async {
-    print('INIT');
     // Get a location using path_provider
     // Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = '';
@@ -83,19 +79,21 @@ class AppDatabase {
     return db.transaction((Transaction txn) async {
       await txn.execute("CREATE TABLE ${MyTask.tblTask} ("
           "${MyTask.dbId} INTEGER PRIMARY KEY AUTOINCREMENT,"
-          "${MyTask.dbTitle} TEXT,"
           "${MyTask.dbDetail} TEXT,"
           "${MyTask.dbItemType} TEXT,"
           "${MyTask.dbPriority} TEXT,"
           "${MyTask.dbStatus} TEXT,"
           "${MyTask.dbCreatedDate} LONG,"
+          "${MyTask.dbCompletedDate} LONG,"
           "${MyTask.dbDueDate} LONG,"
           "${MyTask.dbCustomerId} INTEGER,"
           "${MyTask.dbCustomerName} TEXT,"
+          "${MyTask.dbCustomerPhone} TEXT,"
           "${MyTask.dbShelfBefore} INTEGER,"
           "${MyTask.dbShelfAfter} INTEGER,"
           "${MyTask.dbPrice} REAL,"
-          "FOREIGN KEY(${MyTask.dbCustomerId}) REFERENCES ${Customer.tblCustomer} (${Customer.dbId}) ON DELETE CASCADE);");
+          "FOREIGN KEY(${MyTask.dbCustomerId}) REFERENCES ${Customer.tblCustomer} "
+          "(${Customer.dbId}) ON DELETE CASCADE);");
 
       // await txn.rawInsert(
       //     'INSERT INTO ${MyTask.tblTask}(${MyTask.dbId}, ${MyTask.dbTitle},${MyTask.dbDetail},${MyTask.dbItemType},${MyTask.dbPriority},${MyTask.dbStatus},${MyTask.dbCreatedDate},${MyTask.dbDueDate},${MyTask.dbCustomerId},${MyTask.dbCustomerName},  ${MyTask.dbShelfBefore}, ${MyTask.dbShelfAfter})'

@@ -13,27 +13,34 @@ import '../../task/views/creat_task_dialog.dart';
 import '../../task/views/task_view.dart';
 import '../controllers/customer_controller.dart';
 
-class CustomerTaskView extends StatelessWidget {
+class CustomerTaskView extends StatefulWidget {
   CustomerTaskView({super.key, required this.customerId, required this.name});
-
-  final taskController = Get.find<TaskController>();
 
   final int customerId;
   final String name;
 
   @override
+  State<CustomerTaskView> createState() => _CustomerTaskViewState();
+}
+
+class _CustomerTaskViewState extends State<CustomerTaskView> {
+  final taskController = Get.find<TaskController>();
+
+  void _refreshScreen() => setState((){});
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('$name Tasks'),
+        title: Text('${widget.name} Tasks'),
         leading: IconButton(onPressed: () {
           print('back');
           Navigator.pop(context);
-        },icon: Icon(Icons.arrow_back, color: Colors.white,),),
+        },icon: const Icon(Icons.arrow_back, color: Colors.white,),),
       ),
       drawer: CustomDrawer(),
       body: FutureBuilder<List<MyTask>>(
-        future: taskController.taskByCustomer(customerId),
+        future: taskController.taskByCustomer(widget.customerId),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final filteredTasks = snapshot.data!;
@@ -57,6 +64,7 @@ class CustomerTaskView extends StatelessWidget {
                 BuildTaskTiles(
                   taskList: todayPendingTasks,
                   emptyMsg: 'There is no pending tasks',
+                  callback: _refreshScreen,
                 ),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: Get.width * 0.05, vertical: 16),
@@ -68,11 +76,12 @@ class CustomerTaskView extends StatelessWidget {
                 BuildTaskTiles(
                   taskList: todayCompletedTasks,
                   emptyMsg: 'There is no completed tasks',
+                  callback: _refreshScreen,
                 ),
               ],
             );
           } else {
-            return const CircularProgressIndicator(); // Loading indicator
+            return Center(child: const CircularProgressIndicator()); // Loading indicator
           }
         },
       ),

@@ -14,7 +14,8 @@ class CustomerController extends GetxController {
 
   Stream<List<Customer>> get customers => _customerController!.stream;
   late CustomerDB _customerDB;
-  RxBool showSearch = false.obs;
+  final customerPhoneController = TextEditingController();
+  final customerNameFocus = FocusNode();
 
   @override
   void onInit() {
@@ -49,6 +50,37 @@ class CustomerController extends GetxController {
     await _customerDB.delete(customer).then((value) {
       _loadCustomers();
     });
+  }
+
+  Future<void> deleteWithAlert(Customer customer) async {
+    // Show an AlertDialog to confirm the deletion
+    bool? confirmDelete = await Get.dialog<bool>(
+      AlertDialog(
+        title: const Text('Delete Customer'),
+        content: const Text('Are you sure you want to delete this customer and related tasks?'),
+        actions: [
+          TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor: Get.theme.primaryColor,
+            ),
+            onPressed: () => Get.back(result: false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Get.back(result: true),
+            style: TextButton.styleFrom(
+              foregroundColor: Get.theme.primaryColor,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmDelete == true) {
+      await delete(customer);
+    }
+    Get.back();
   }
 
 

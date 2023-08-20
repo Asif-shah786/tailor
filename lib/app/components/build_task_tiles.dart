@@ -9,8 +9,9 @@ import '../modules/task/controllers/task_controller.dart';
 import '../modules/task/model/tasks.dart';
 
 class BuildTaskTiles extends StatefulWidget {
-  BuildTaskTiles({super.key, required this.taskList, this.emptyMsg = ''});
+  BuildTaskTiles({super.key, required this.taskList, this.emptyMsg = '', this.callback});
   final List<MyTask> taskList;
+  VoidCallback? callback;
   final String emptyMsg;
 
   @override
@@ -20,16 +21,19 @@ class BuildTaskTiles extends StatefulWidget {
 class _BuildTaskTilesState extends State<BuildTaskTiles> {
   final TaskController controller = Get.find<TaskController>();
   final _shelAfterController = TextEditingController();
+  final FocusNode _shelAfterFocus = FocusNode();
 
 
 @override
   void dispose() {
     // TODO: implement dispose
+  _shelAfterFocus.dispose();
   _shelAfterController.dispose();
     super.dispose();
   }
 
   Future<void> markTaskCompleted(BuildContext context, MyTask task) async {
+  _shelAfterFocus.requestFocus();
     _shelAfterController.clear();
     await Get.defaultDialog(
       confirm: ElevatedButton(
@@ -51,6 +55,7 @@ class _BuildTaskTilesState extends State<BuildTaskTiles> {
           },
           child: const Text('Cancel')),
       title: 'Enter After Shelf Number',
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
       content: Column(
         children: [
           TextFormField(
@@ -59,8 +64,9 @@ class _BuildTaskTilesState extends State<BuildTaskTiles> {
             inputFormatters: [
               FilteringTextInputFormatter.digitsOnly
             ], // Allows only digits
+            focusNode: _shelAfterFocus,
             decoration: InputDecoration(
-              hintText: 'Enter shelf Number',
+              hintText: 'Enter After shelf Number',
               hintStyle: Theme.of(context).textTheme.bodySmall,
             ),
             validator: (String? text) {
@@ -100,6 +106,11 @@ class _BuildTaskTilesState extends State<BuildTaskTiles> {
         itemBuilder: (BuildContext context, int index) {
           MyTask task = widget.taskList[index];
           bool overDueTask = task.taskStatus == strTaskStatusOverDue;
+          bool isCompletedLate = task.taskStatus == strTaskStatusComplete &&
+              DateTime.fromMicrosecondsSinceEpoch(task.completedDate!).isAfter(
+                  DateTime.fromMicrosecondsSinceEpoch(task.dueDate));
+
+
           ShapeBorder shape =
               getTileShapeWithIndex(index == widget.taskList.length - 1 ? -1 : index);
           return Card(
@@ -114,105 +125,36 @@ class _BuildTaskTilesState extends State<BuildTaskTiles> {
               backgroundColor: theme.splashColor,
               key: ValueKey(task.id),
               title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Text(task.title,
-                      style:
-                          const TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold)),
-                  if(overDueTask) const Icon(Icons.watch_later, color: Colors.red,)
+                  buildTaskChild(
+                      theme: theme,
+                      title: task.customerName,
+                      icon: IconlyLight.user),
+                  buildTaskChild(
+                      theme: theme,
+                      title: task.customerPhone,
+                      icon: IconlyLight.call),
+                  buildTaskChild(
+                      theme: theme,
+                      title:  "${task.price.toString()} \$",
+                      icon: IconlyLight.buy,),
+                  buildTaskChildText(
+                      value: DateFormat('d MMMM').format(
+                          DateTime.fromMicrosecondsSinceEpoch(task.dueDate)),
+                      title: 'Due Date ',
+                      theme: theme),
+                  const Expanded(child: SizedBox(width: 4 ,),),
+                  if(isCompletedLate) Text('late', style: context.textTheme.titleSmall!.copyWith(
+                      fontStyle: FontStyle.italic,
+                      color : Colors.red),),
+                  if(overDueTask) const Icon(Icons.watch_later, color: Colors.red,),
+                  IconButton(onPressed: (){}, icon: const Icon(Icons.print)),
+
                 ],
               ),
               childrenPadding: const EdgeInsets.all(16),
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      height: 36,
-                      child: Card(
-                          elevation: 2,
-                          color: theme.cardColor,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8)),
-                          child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 6.0),
-                            child: Row(
-                              children: [
-                                const Padding(
-                                  padding: EdgeInsets.only(right: 6),
-                                  child: Icon(
-                                    IconlyLight.user,
-                                  ),
-                                ),
-                                Text(
-                                  task.customerName,
-                                  style: theme.textTheme.bodySmall!.copyWith(
-                                      fontWeight: FontWeight.normal,
-                                      fontSize: 16.sp),
-                                ),
-                              ],
-                            ),
-                          )),
-                    ),
-                    SizedBox(
-                      height: 36,
-                      child: Card(
-                          elevation: 2,
-                          color: theme.cardColor,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8)),
-                          child: Padding(
-                            padding:
-                            const EdgeInsets.symmetric(horizontal: 6.0),
-                            child: Row(
-                              children: [
-                                const Padding(
-                                  padding: EdgeInsets.only(right: 6),
-                                  child: Icon(
-                                    IconlyLight.buy,
-                                  ),
-                                ),
-                                Text(
-                                  "${task.price.toString()} \$",
-                                  style: theme.textTheme.bodySmall!.copyWith(
-                                      fontWeight: FontWeight.normal,
-                                      fontSize: 16.sp),
-                                ),
-                              ],
-                            ),
-                          )),
-                    ),
-                    const Expanded(child: SizedBox(width: 2,)),
-                    IconButton(
-                        onPressed: () async => await controller.delete(task.id!),
-                        icon: const Icon(
-                          IconlyBold.delete,
-                          color: Colors.red,
-                        )),
-                    task.taskStatus == strTaskStatusPending
-                        ? ElevatedButton(
-                            onPressed: () async =>
-                                await markTaskCompleted(context, task),
-                            child: const Text('Mark Completed'))
-                        : task.taskStatus == strTaskStatusComplete ?
-                    ElevatedButton(
-                            onPressed: () async {
-                              final controller = Get.find<TaskController>();
-                              await controller.markTask(
-                                  task, strTaskStatusPending, null);
-                            },
-                            child: const Text('Mark Pending')) :
-                    ElevatedButton(
-                        onPressed: () async =>
-                        await markTaskCompleted(context, task),
-                        child: const Text('Mark Completed'))
-                    ,
-
-
-                  ],
-                ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -222,19 +164,63 @@ class _BuildTaskTilesState extends State<BuildTaskTiles> {
                         icon: task.taskStatus == strTaskStatusComplete
                             ? IconlyBold.tick_square
                             : IconlyBold.close_square),
-                    buildTaskChild(
-                        title: DateFormat('d MMMM').format(
-                            DateTime.fromMicrosecondsSinceEpoch(task.dueDate)),
-                        icon: IconlyBold.calendar,
+                    buildTaskChildText(
+                        value: DateFormat('d MMMM').format(
+                            DateTime.fromMicrosecondsSinceEpoch(task.createdDate!)),
+                        title: 'Created Date',
+                        theme: theme),
+                    buildTaskChildText(
+                        value: task.completedDate == -1 ? 'Nil' : DateFormat('d MMMM').format(
+                            DateTime.fromMicrosecondsSinceEpoch(task.completedDate!)),
+                        title: 'Completed Date',
                         theme: theme),
                     buildTaskChild(
                         theme: theme,
-                        title: 'Shelf Before (${task.shelfBefore})',
+                        title: 'Shelf Before ${task.shelfBefore == -1 ? 'Nil' : task.shelfBefore}',
                         icon: IconlyBold.category),
                     buildTaskChild(
                         theme: theme,
-                        title: 'Shelf After (${task.shelfAfter ?? ''})',
+                        title: 'Shelf After ${task.shelfAfter == -1 ? 'Nil' : task.shelfAfter}',
                         icon: IconlyBold.category),
+                    const Expanded(child: SizedBox(width: 1,)),
+
+                    const Expanded(child: SizedBox(width: 2,)),
+                    IconButton(
+                        onPressed: () async {
+                          await controller.deleteWithAlert(task.id!);
+                          if(widget.callback != null){
+                            widget.callback!();
+                          }
+                        },
+                        icon: const Icon(
+                          IconlyBold.delete,
+                          color: Colors.red,
+                        )),
+                    task.taskStatus == strTaskStatusPending
+                        ? ElevatedButton(
+                        onPressed: () async {
+                          await markTaskCompleted(context, task);
+                          if(widget.callback != null){
+                            widget.callback!();
+                          }
+                        },
+                        child: const Text('Mark Completed'))
+                        : task.taskStatus == strTaskStatusComplete ?
+                    ElevatedButton(
+                        onPressed: () async {
+                          final controller = Get.find<TaskController>();
+                          await controller.markTask(
+                              task, strTaskStatusPending, null);
+                          if(widget.callback != null){
+                            widget.callback!();
+                          }
+                        },
+                        child: const Text('Mark Pending')) :
+                    ElevatedButton(
+                        onPressed: () async =>
+                        await markTaskCompleted(context, task),
+                        child: const Text('Mark Completed'))
+                    ,
                   ],
                 ),
                 Padding(
@@ -252,31 +238,65 @@ class _BuildTaskTilesState extends State<BuildTaskTiles> {
     );
   }
 
-  Card buildTaskChild(
+  SizedBox buildTaskChild(
       {required ThemeData theme,
       required String title,
       required IconData icon}) {
-    return Card(
-        elevation: 2,
-        color: theme.cardColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6.0),
-          child: Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(right: 6),
-                child: Icon(
-                  icon,
+    return SizedBox(
+      height: 36,
+      child: Card(
+          elevation: 2,
+          color: theme.cardColor,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6.0),
+            child: Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: Icon(
+                    icon,
+                  ),
                 ),
-              ),
-              Text(
-                title,
-                style: theme.textTheme.bodySmall,
-              ),
-            ],
-          ),
-        ));
+                Text(
+                  title,
+                  style: theme.textTheme.bodyMedium,
+                ),
+              ],
+            ),
+          )),
+    );
+  }
+
+  SizedBox buildTaskChildText(
+      {required ThemeData theme,
+        required String title,
+        required String value}) {
+    return SizedBox(
+      height: 36,
+      child: Card(
+          elevation: 2,
+          color: theme.cardColor,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6.0),
+            child: Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child:       Text(
+                    title,
+                    style: theme.textTheme.titleSmall,
+                  ),
+                ),
+                Text(
+                  value,
+                  style: theme.textTheme.bodyMedium,
+                ),
+              ],
+            ),
+          )),
+    );
   }
 
   ShapeBorder getTileShapeWithIndex(int index) {

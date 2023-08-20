@@ -8,8 +8,8 @@ class Customer {
   static const dbAddress = "address";
   static const dbCreatedDate = "created_date";
 
-  String name;
-  String? phone, address;
+  String phone, name;
+  String? address;
   int? createdDate, id;
 
 
@@ -24,9 +24,9 @@ class Customer {
   }
 
   Customer.create({
+    required this.phone,
     required this.name,
     this.address = '',
-    this.phone = '',
     this.createdDate = -1,
     this.id = 0,
   }) {
@@ -39,9 +39,9 @@ class Customer {
 
   Customer.update({
     required this.id,
+    required this.phone,
     required this.name,
     this.address = '',
-    this.phone = '',
     this.createdDate = -1,
   }) {
     if (this.createdDate == -1) {

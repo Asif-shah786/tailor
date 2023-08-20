@@ -11,7 +11,7 @@ class ExploreController extends GetxController {
 
   RxBool showFilterTab = true.obs;
 
-  final TextEditingController titleController = TextEditingController(),
+  final TextEditingController phoneController = TextEditingController(),
       customerNameController = TextEditingController(),
       statusController = TextEditingController(),
       dateController = TextEditingController();
@@ -22,7 +22,7 @@ class ExploreController extends GetxController {
   RxMap filters = {}.obs;
 
   clearFilters(){
-    titleController.clear();
+    phoneController.clear();
     customerNameController.clear();
     statusController.clear();
     dateController.clear();
@@ -57,7 +57,7 @@ class ExploreController extends GetxController {
 
   Future<void> applyFilter() async {
     List<MyTask> tasks = await taskController.getFilteredTasks(
-        title: titleController.text,
+        title: phoneController.text,
         customerName: customerNameController.text,
         status: statusController.text,
         date: dateController.text.isNotEmpty ? dueDate : null);
@@ -68,8 +68,8 @@ class ExploreController extends GetxController {
 
   updateFilterWidgets() {
     // filters.clear();
-    if (titleController.text.isNotEmpty) {
-      filters['Title'] = titleController.text;
+    if (phoneController.text.isNotEmpty) {
+      filters['Title'] = phoneController.text;
     }
     if (customerNameController.text.isNotEmpty) {
       filters['C\' Name'] = customerNameController.text;

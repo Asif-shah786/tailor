@@ -5,7 +5,9 @@ import 'package:get/get.dart';
 import 'package:iconly/iconly.dart';
 import 'package:tailor/app/modules/customer/controllers/customer_controller.dart';
 import 'package:tailor/app/modules/task/controllers/task_controller.dart';
+import '../../../../utils/validators.dart';
 import '../../Customer/model/Customers.dart';
+import '../../customer/views/create_customer_dialog.dart';
 import '../../customer/views/customer_view.dart';
 import '../model/tasks.dart';
 
@@ -20,29 +22,46 @@ class _CreateTaskDialogState extends State<CreateTaskDialog> {
 
   List<Customer> customers = [];
   List<Customer> searchCustomers = [];
-  List<String> itemTypes = ['Item Type 1', 'Item Type 2', 'Item Type 3'];
+  List<String> itemTypes = [
+    'Other',
+    'Shirt',
+    'Pants',
+    'Dress',
+    'Skirt',
+    'Blouse',
+    'Jacket',
+    'Coat',
+    'Suit',
+    'Vest',
+    'Trousers',
+    'Shorts',
+    'Tie',
+    'Scarf',
+  ];
 
   @override
   void initState() {
     // TODO: implement initState
     controller.refresh();
     taskController.refresh();
+    dueDate = DateTime(now.year, now.month, now.day);
     super.initState();
   }
 
-  final TextEditingController _titleController = TextEditingController(),
-      _customerNameController = TextEditingController(),
+  final TextEditingController _customerPhoneController =
+          TextEditingController(),
       _dateController = TextEditingController(),
       _shelBeforeController = TextEditingController(),
       _priceController = TextEditingController(),
       _detailController = TextEditingController();
-  final _customerNameFocus = FocusNode(), _descriptionFocus = FocusNode();
+  final _customerNameFocus = FocusNode(), _priceFocus = FocusNode();
   final GlobalKey<FormState> formKeyTask = GlobalKey<FormState>();
 
   late Customer selectedCustomer;
-  String? selectedItemType; // Initialize with null
-  String taskHint = "Task title";
+  String? selectedItemType; // In
+  // itialize with null
 
+  DateTime now = DateTime.now();
   DateTime dueDate = DateTime.now();
 
   Future<void> _selectDate(BuildContext context) async {
@@ -59,14 +78,15 @@ class _CreateTaskDialogState extends State<CreateTaskDialog> {
             colorScheme: ColorScheme.light(
                 primary: context
                     .theme.primaryColor), // Change the color scheme to blue
-            buttonTheme: const ButtonThemeData(textTheme: ButtonTextTheme.primary),
+            buttonTheme:
+                const ButtonThemeData(textTheme: ButtonTextTheme.primary),
           ),
           child: child!,
         );
       },
     );
 
-    if (picked != null && picked != dueDate) {
+    if (picked != null) {
       setState(() {
         dueDate = DateTime(picked.year, picked.month, picked.day);
         _dateController.text = "${dueDate.toLocal()}".split(' ')[0];
@@ -79,7 +99,7 @@ class _CreateTaskDialogState extends State<CreateTaskDialog> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Create Task'),
-        leading:           IconButton(
+        leading: IconButton(
             onPressed: () => Navigator.pop(context),
             icon: const Icon(
               Icons.arrow_back,
@@ -103,24 +123,178 @@ class _CreateTaskDialogState extends State<CreateTaskDialog> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    TextFormField(
-                      controller: _titleController,
-                      textInputAction: TextInputAction.next,
-                      decoration: InputDecoration(
-                        hintText: taskHint,
-                        hintStyle: context.textTheme.bodySmall,
-                      ),
-                      validator: (String? text) {
-                        if (text == null || text.isEmpty) {
-                          return 'Title is required';
-                        }
-                        return null;
-                      },
+                    Column(
+                      children: [
+                        TextFormField(
+                          controller: _customerPhoneController,
+                          keyboardType: TextInputType.phone,
+                          textInputAction: TextInputAction.next,
+                          focusNode: _customerNameFocus,
+                          inputFormatters: [
+                            PhoneNumberFormatter()
+                          ], // Attach the focus node
+                          decoration: InputDecoration(
+                              hintText: 'Customer Phone',
+                              hintStyle: context.textTheme.bodySmall),
+                          onChanged: (query) => setState(() {}),
+                          onEditingComplete: () {
+                            _customerNameFocus
+                                .unfocus(); // Remove focus from the current field
+                          },
+                          validator: (String? text) {
+                            if (text == null || text.isEmpty) {
+                              return 'Customer Phone is required';
+                            }
+                            return null;
+                          },
+                        ),
+                        StreamBuilder<List<Customer>>(
+                          stream: controller.customers,
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) {
+                              return const SizedBox
+                                  .shrink(); // Loading indicator
+                            }
+                            final filteredCustomers = snapshot.data!
+                                .where((customer) => customer.phone!
+                                    .contains(_customerPhoneController.text))
+                                .toList();
+
+                            print(
+                                'filteredCustomers ${filteredCustomers.length}');
+
+                            if (!_customerNameFocus.hasFocus) {
+                              return const SizedBox.shrink();
+                            }
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _customerPhoneController.text.isEmpty
+                                    ? const SizedBox.shrink()
+                                    : filteredCustomers.isEmpty
+                                        ? ListTile(
+                                            minVerticalPadding: 0,
+                                            minLeadingWidth: 0,
+                                            title: Text(
+                                              'Customer not found, Click to add New Customer (+)',
+                                              textAlign: TextAlign.start,
+                                              style:
+                                                  context.textTheme.bodySmall,
+                                            ),
+                                            trailing: Icon(
+                                              IconlyBold.plus,
+                                              color: context.iconColor,
+                                            ),
+                                            dense: true,
+                                            onTap: () async {
+                                              var customer = await Get.dialog(
+                                                  CreateCustomerDialog(
+                                                      customerPhone:
+                                                          _customerPhoneController
+                                                              .text));
+                                              _customerPhoneController.clear();
+                                              if (customer != null) {
+                                                selectedCustomer = customer;
+                                                _customerPhoneController.text =
+                                                    customer.phone;
+                                                _customerNameFocus.unfocus();
+                                                _priceFocus.requestFocus();
+                                              }
+                                            },
+                                          ) // Loading indicator
+                                        : Container(
+                                            height: 100,
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 8.0),
+                                            child: ListView.separated(
+                                              separatorBuilder: (_, index) =>
+                                                  Divider(
+                                                      height: 0.5,
+                                                      color: context
+                                                          .theme.dividerColor),
+                                              itemCount:
+                                                  filteredCustomers.length,
+                                              itemBuilder: (context, index) {
+                                                return InkWell(
+                                                  onTap: () {
+                                                    // Select suggestion
+                                                    selectedCustomer =
+                                                        filteredCustomers[
+                                                            index];
+                                                    _customerPhoneController
+                                                            .text =
+                                                        filteredCustomers[index]
+                                                            .phone!;
+                                                    _customerNameFocus
+                                                        .unfocus();
+                                                    _priceFocus.requestFocus();
+                                                    setState(() {});
+                                                  },
+                                                  child: Container(
+                                                    height:
+                                                        30, // Adjust the height as needed
+                                                    alignment:
+                                                        Alignment.centerLeft,
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text(
+                                                          "Phone: ${filteredCustomers[index].phone ?? ''}",
+                                                          style: context
+                                                              .textTheme
+                                                              .bodyMedium!
+                                                              .copyWith(
+                                                                  color: Colors
+                                                                      .black),
+                                                        ),
+                                                        const SizedBox(
+                                                          width: 8,
+                                                        ),
+                                                        Text(
+                                                          "Name: ${filteredCustomers[index].name ?? ''}",
+                                                          style: context
+                                                              .textTheme
+                                                              .bodyMedium!
+                                                              .copyWith(
+                                                                  color: Colors
+                                                                      .black),
+                                                        ),
+                                                        const Expanded(
+                                                          child: SizedBox(
+                                                            width: 4,
+                                                          ),
+                                                        ),
+                                                        Text(
+                                                          'Select',
+                                                          style: context
+                                                              .textTheme
+                                                              .titleSmall!
+                                                              .copyWith(
+                                                                  color: context
+                                                                      .theme
+                                                                      .primaryColor),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ),
+                              ],
+                            );
+                          },
+                        ),
+                      ],
                     ),
+                    const SizedBox(height: 10),
                     TextFormField(
                       controller: _priceController,
                       textInputAction: TextInputAction.next,
                       keyboardType: TextInputType.number,
+                      focusNode: _priceFocus,
                       inputFormatters: [
                         FilteringTextInputFormatter.digitsOnly
                       ], // Allows only digits
@@ -172,7 +346,7 @@ class _CreateTaskDialogState extends State<CreateTaskDialog> {
                         DropdownMenuItem<String>(
                           value: null,
                           child: Text(
-                            "Select Item Type",
+                            "Select Cloth Type",
                             style: context.textTheme.bodySmall,
                           ), // Placeholder text
                         ),
@@ -207,148 +381,8 @@ class _CreateTaskDialogState extends State<CreateTaskDialog> {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    Column(
-                      children: [
-                        TextFormField(
-                          controller: _customerNameController,
-                          textInputAction: TextInputAction.next,
-                          focusNode:
-                              _customerNameFocus, // Attach the focus node
-                          decoration: InputDecoration(
-                              hintText: 'Customer Name',
-                              hintStyle: context.textTheme.bodySmall),
-                          onChanged: (query) => setState(() {}),
-                          onEditingComplete: () {
-                            _customerNameFocus
-                                .unfocus(); // Remove focus from the current field
-                          },
-                          validator: (String? text) {
-                            if (text == null || text.isEmpty) {
-                              return 'Customer Name is required';
-                            }
-                            return null;
-                          },
-                        ),
-                        StreamBuilder<List<Customer>>(
-                          stream: controller.customers,
-                          builder: (context, snapshot) {
-                            if (!snapshot.hasData) {
-                              return const SizedBox
-                                  .shrink(); // Loading indicator
-                            }
-                            final filteredCustomers = snapshot.data!
-                                .where((customer) => customer.name
-                                    .toLowerCase()
-                                    .contains(_customerNameController.text
-                                        .toLowerCase()))
-                                .toList();
-
-                            if (!_customerNameFocus.hasFocus) {
-                              return const SizedBox.shrink();
-                            }
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _customerNameController.text.isEmpty
-                                    ? const SizedBox.shrink()
-                                    : filteredCustomers.isEmpty
-                                        ? ListTile(
-                                            minVerticalPadding: 0,
-                                            minLeadingWidth: 0,
-                                            title: Text(
-                                              'Customer not found, Click to add New Customer (+)',
-                                              textAlign: TextAlign.start,
-                                              style:
-                                                  context.textTheme.bodySmall,
-                                            ),
-                                            trailing: Icon(
-                                              IconlyBold.plus,
-                                              color: context.iconColor,
-                                            ),
-                                            dense: true,
-                                            onTap: () async {
-                                              _customerNameController.clear();
-                                              Get.dialog(
-                                                  const CreateCustomerDialog());
-                                            },
-                                          ) // Loading indicator
-                                        : Container(
-                                            height: 100,
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 8.0),
-                                            child: ListView.separated(
-                                              separatorBuilder: (_, index) =>
-                                                  Divider(
-                                                      height: 0.5,
-                                                      color: context
-                                                          .theme.dividerColor),
-                                              itemCount:
-                                                  filteredCustomers.length,
-                                              itemBuilder: (context, index) {
-                                                return InkWell(
-                                                  onTap: () {
-                                                    // Select suggestion
-                                                    selectedCustomer =
-                                                        filteredCustomers[
-                                                            index];
-                                                    _customerNameController
-                                                            .text =
-                                                        filteredCustomers[index]
-                                                            .name;
-                                                    _customerNameFocus
-                                                        .unfocus();
-                                                    _descriptionFocus
-                                                        .requestFocus();
-                                                    setState(() {});
-                                                  },
-                                                  child: Container(
-                                                    height:
-                                                        30, // Adjust the height as needed
-                                                    alignment:
-                                                        Alignment.centerLeft,
-                                                    child: Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceBetween,
-                                                      children: [
-                                                        Text(
-                                                          filteredCustomers[
-                                                                  index]
-                                                              .name,
-                                                          style: context
-                                                              .textTheme
-                                                              .bodyMedium!
-                                                              .copyWith(
-                                                                  color: Colors
-                                                                      .black),
-                                                        ),
-                                                        Text(
-                                                          'Select',
-                                                          style: context
-                                                              .textTheme
-                                                              .titleSmall!
-                                                              .copyWith(
-                                                                  color: context
-                                                                      .theme
-                                                                      .primaryColor),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                );
-                                              },
-                                            ),
-                                          ),
-                              ],
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
                     TextFormField(
                       controller: _detailController,
-                      focusNode: _descriptionFocus,
                       minLines: 5, // Set the minimum number of lines
                       maxLines: 5, // Set the maximum number of lines
                       decoration: InputDecoration(
@@ -369,11 +403,10 @@ class _CreateTaskDialogState extends State<CreateTaskDialog> {
                         if (!formKeyTask.currentState!.validate()) {
                           return;
                         }
-                        if (_customerNameController.text.isNotEmpty &&
-                            _titleController.text.isNotEmpty) {
+                        if (_customerPhoneController.text.isNotEmpty) {
                           MyTask task = MyTask.create(
+                            customerPhone: selectedCustomer.phone,
                             customerName: selectedCustomer.name,
-                            title: _titleController.text,
                             itemType: selectedItemType ?? '',
                             detail: _detailController.text ?? '',
                             dueDate: dueDate!.microsecondsSinceEpoch,
@@ -381,8 +414,16 @@ class _CreateTaskDialogState extends State<CreateTaskDialog> {
                             customerId: selectedCustomer.id!,
                             shelfBefore: int.parse(_shelBeforeController.text),
                           );
-
-                          await taskController.createTask(task);
+                          await taskController
+                              .createTask(task)
+                              .then((result) async {
+                            if (DateTime.fromMicrosecondsSinceEpoch(
+                                    task.dueDate)
+                                .isBefore(
+                                    DateTime(now.year, now.month, now.day))) {
+                              await taskController.refreshDues();
+                            }
+                          });
                         }
                         Get.back(); // Close the dialog
                       },
@@ -400,8 +441,7 @@ class _CreateTaskDialogState extends State<CreateTaskDialog> {
 
   @override
   void dispose() {
-    _titleController.dispose();
-    _customerNameController.dispose();
+    _customerPhoneController.dispose();
     super.dispose();
   }
 }

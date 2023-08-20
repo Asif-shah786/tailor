@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:flutter/services.dart';
 
 class FormValidator extends GetxController {
   // Observables
@@ -73,3 +74,18 @@ class FormValidator extends GetxController {
 //                   },
 //               child: Text('Submit'),
 //      ),
+
+
+
+class PhoneNumberFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    final RegExp phoneNumberRegex = RegExp(r'^\+?\d{0,12}$'); // Modify the regex as needed
+    if (phoneNumberRegex.hasMatch(newValue.text)) {
+      return newValue;
+    }
+
+    return oldValue;
+  }
+}
